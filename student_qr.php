@@ -8,7 +8,7 @@ if (!isset($_COOKIE['loggedIn'])) {
 }
 
 // Check if the user is a student or an admin
-if ($_COOKIE['role'] !== 'admin') {
+if ($_COOKIE['role'] !== 'student') {
     header('Location: dashboard.php');
     exit;
 }

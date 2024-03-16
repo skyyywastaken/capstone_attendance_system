@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Check if the QR code is expired
             $now = time();
 
-            if ($now >= $expiration_time) {
+            if ($now <= $expiration_time) {
                 if ($insert_stmt->execute()) {
                     // Fetch student information
                     $student_info = $result->fetch_assoc();
