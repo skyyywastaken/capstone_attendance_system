@@ -34,9 +34,10 @@ $student_image = isset($_GET['student_image']) ? urldecode($_GET['student_image'
 <body>
   
   <div class="content">
-  <div class="loading-overlay">Loading...</div>
     <?php include './static/header.php'; ?>
     <div class="main">
+    <div class="loading-overlay">Please wait...</div>
+
       <h1>Attendance System</h1>
       <p class="instructions">Please scan your QR code to record your attendance. The QR code is only valid for 5
         seconds. If the QR code has expired, please refresh it by selecting 'Generate New QR Code' on your device. Your
@@ -99,20 +100,52 @@ $student_image = isset($_GET['student_image']) ? urldecode($_GET['student_image'
     }, 5000); // Focus every 10 seconds (10000 milliseconds)
   }
 
-  document.querySelector("form").addEventListener("submit", function(event) {
+  function showLoadingOverlay() {
+    var overlay = document.querySelector('.loading-overlay');
+    overlay.style.display = 'flex';
+    disableForm();
+  }
+
+  function hideLoadingOverlay() {
+    var overlay = document.querySelector('.loading-overlay');
+    overlay.style.display = 'none';
+    enableForm();
+  }
+
+  function disableForm() {
+    var form = document.querySelector('.form');
+    var inputField = document.getElementById('student_id');
+    inputField.disabled = true;
+  }
+
+  function enableForm() {
+    var form = document.querySelector('.form');
+    var inputField = document.getElementById('student_id');
+    inputField.disabled = false;
+  }
+
+  document.querySelector(".form").addEventListener("submit", function(event) {
+    // Show loading overlay when the form is submitted
+    // showLoadingOverlay();
+
     var qrCodeData = document.getElementById("student_id").value;
     console.log(qrCodeData)
     if (!qrCodeData) {
       alert("Please scan a QR code.");
       event.preventDefault(); // Prevent form submission
     }
+
+    setTimeout(function() {
+      showLoadingOverlay();
+    }, 500);
   });
 
   document.addEventListener('DOMContentLoaded', function() {
     ensureInputFocus(); // Focus initially
     focusInputPeriodically(); // Focus every 10 seconds
   });
-  </script>
+</script>
+
 
 
 </body>
