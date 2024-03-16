@@ -1,0 +1,38 @@
+/* dashboard_style.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+}
+
+p {
+  text-align: center;
+}
+
+.qr-code-img {
+  display: block;
+  margin: 0 auto;
+  padding: 20px 0;
+  width: 250px;
+  height: auto;
+}
+
+.center {
+  text-align: center;
+}
+
+button {
+  padding: 10px;
+  background-color: #007d4c;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #016940;
+}

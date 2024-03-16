@@ -1,0 +1,104 @@
+/* Content Styles */
+.content {
+  margin-left: 0px !important;
+}
+
+/* Form styles */
+.form {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+
+/* Header styles */
+h1 {
+  text-align: center;
+}
+
+p {
+  text-align: center;
+}
+
+/* Message styles */
+.message {
+  margin: 0 auto; /* Center horizontally */
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-start; /* Start items at the beginning */
+  align-items: center;
+  text-align: center;
+}
+
+.error-message {
+  width: fit-content;
+  padding: 10px 20px;
+  background-color: #7d0400;
+  color: white;
+  border: none;
+  font-size: 16px;
+}
+
+.success-message {
+  width: fit-content;
+  padding: 10px 20px;
+  background-color: #007d4c;
+  color: white;
+  border: none;
+  font-size: 16px;
+}
+
+.student-info {
+  margin: 0 auto; /* Center horizontally */
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-start; /* Start items at the beginning */
+  align-items: center;
+  background-color: #007d4c; /* Green background */
+  padding: 15px 20px;
+  width: 500px;
+  height: 250px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.student-image {
+  margin-right: 20px; /* Add space between image and info */
+}
+
+.student-image img {
+  border-radius: 50%; /* Make the image circular */
+  border: 2px solid white; /* Add a border around the image */
+  max-width: 150px;
+  max-height: 150px;
+}
+
+.student-details {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+}
+
+.info-label {
+  font-weight: bold;
+  letter-spacing: 1px; /* Add letter spacing */
+}
+
+.info-value {
+  font-weight: normal;
+  text-transform: none; /* Uppercase text */
+  letter-spacing: normal; /* Add letter spacing */
+}
+
+.loading-overlay {
+  display: none; /* Hide the loading overlay by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
+  z-index: 9999; /* Ensure it's above other elements */
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+}

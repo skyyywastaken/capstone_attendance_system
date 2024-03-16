@@ -1,0 +1,158 @@
+<?php
+// Include the database connection file
+include 'db_connect.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Check if the form was submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get the QR data from the form
+    $qr_data = $_POST['student_id'];
+
+    // Separate the student ID, unique ID, and expiration time
+    $parts = explode("_", $qr_data);
+
+    // Check if the array keys exist before accessing them
+    $student_id = isset($parts[0]) ? $parts[0] : null;
+    $expiration_time = isset($parts[1]) ? $parts[1] : null;
+
+    // Check if the student ID is registered
+    if ($student_id) {
+        $stmt = $db_conn->prepare("SELECT * FROM students WHERE student_id = ?");
+        $stmt->bind_param("s", $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            // Student ID is registered, insert the attendance record into the database
+            $insert_stmt = $db_conn->prepare("INSERT INTO attendance (student_id, date_time) VALUES (?, NOW())");
+            $insert_stmt->bind_param("s", $student_id);
+
+            // Check if the QR code is expired
+            $now = time();
+
+            if ($now >= $expiration_time) {
+                if ($insert_stmt->execute()) {
+                    // Fetch student information
+                    $student_info = $result->fetch_assoc();
+                    $student_name = $student_info['name'];
+                    $student_image = $student_info['image']; // Assuming 'image' is the column name for the image URL
+
+                    // Fetch parent/guardian information
+                    $parent_guardian_username = $student_info['parent_guardian_username'];
+
+                    $email_stmt = $db_conn->prepare("SELECT email FROM users WHERE username = ?");
+                    $email_stmt->bind_param("s", $parent_guardian_username);
+                    $email_stmt->execute();
+                    $email_result = $email_stmt->get_result();
+                    $email_user = $email_result->fetch_assoc();
+
+                    // Send an email to the student's parent
+                    
+                    require 'vendor/autoload.php'; // Include the PHPMailer autoloader
+
+                    // Instantiate PHPMailer
+                    $mail = new PHPMailer(true);
+
+                    try {
+                        // Server settings
+                        $mail->isSMTP();                                        // Send using SMTP
+                        $mail->Host       = 'smtp.gmail.com';                   // Set the SMTP server to send through
+                        $mail->SMTPAuth   = true;                               // Enable SMTP authentication
+                        $mail->Username   = 'sjaattendancesystem@gmail.com';             // SMTP username
+                        $mail->Password   = 'cmxkvzmswwmcgioq';                 // SMTP password
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;     // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+                        $mail->Port       = 587;                                // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
+
+                        // Recipients
+                        $mail->setFrom('sjaattendancesystem@gmail.com', 'SJA Attendance System');
+                        $mail->addAddress($email_user['email']); // Add a recipient
+
+                        // Content
+                        $mail->isHTML(true); // Set email format to HTML
+$mail->Subject = 'Attendance Notification';
+
+// Construct the HTML body with additional information and styling
+$mail->Body = '
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                color: #333;
+            }
+            p {
+                margin-bottom: 20px;
+            }
+            .info {
+                background-color: #f9f9f9;
+                padding: 10px;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Attendance Notification</h1>
+            <p>Your child, <strong>' . $student_info['name'] . '</strong>, has been marked present for today at <strong>' . date('Y-m-d H:i:s') . '</strong>.</p>
+            <div class="info">
+                <p><strong>Student ID:</strong> ' . $student_id . '</p>
+                <p><strong>Parent/Guardian Email:</strong> ' . $email_user['email'] . '</p>
+            </div>
+            <p>Thank you for using our attendance system.</p>
+        </div>
+    </body>
+    </html>
+';
+
+$mail->AltBody = 'Your child, ' . $student_info['name'] . ', has been marked present for today at ' . date('Y-m-d H:i:s') . '.';
+
+                        $mail->send();
+
+                        // Redirect back to attendance_system.php with success message
+                        header("Location: attendance_system.php?success=Attendance%20recorded%20successfully.&student_name=$student_name&student_id=$student_id&student_image=$student_image");
+                        exit(); // Ensure script stops executing after redirection
+                    } catch (Exception $e) {
+                        // Redirect back to attendance_system.php with error message
+                        header("Location: attendance_system.php?error=Message%20could%20not%20be%20sent.%20Mailer%20Error:%20" . $mail->ErrorInfo);
+                        exit(); // Ensure script stops executing after redirection
+                    }
+                } else {
+                    // Redirect back to attendance_system.php with error message
+                    header("Location: attendance_system.php?error=Error%20recording%20attendance:%20" . $insert_stmt->error);
+                    exit(); // Ensure script stops executing after redirection
+                }
+            } else {
+                // Redirect back to attendance_system.php with error message
+                header("Location: attendance_system.php?error=Error:%20QR%20code%20has%20expired.");
+                exit(); // Ensure script stops executing after redirection
+            }
+
+            $insert_stmt->close();
+        } else {
+            // Redirect back to attendance_system.php with error message
+            header("Location: attendance_system.php?error=Error:%20Student%20ID%20is%20not%20registered.");
+            exit(); // Ensure script stops executing after redirection
+        }
+
+        $stmt->close();
+    } else {
+        // Redirect back to attendance_system.php with error message
+        header("Location: attendance_system.php?error=Error:%20Invalid%20QR%20code%20data%20format." . $qr_data);
+        exit(); // Ensure script stops executing after redirection
+    }
+}
+?>

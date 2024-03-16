@@ -1,0 +1,310 @@
+button {
+  padding: 5px;
+  background-color: #E74C3C;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #C0392B;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  z-index: 1000; /* Ensure it's on top of everything else */
+  display: none; /* Hide by default */
+}
+
+.confirmation-message {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #333;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 1001; /* Ensure it's on top of the overlay */
+}
+.confirmation-message #confirmation-text {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.confirmation-message button {
+  margin-right: 10px;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.confirmation-message #confirm-delete-btn {
+  background-color: #E74C3C;
+  color: white;
+}
+
+#confirm-delete-btn:hover {
+  background-color: #C0392B;
+}
+
+.confirmation-message #cancel-delete-btn {
+  background-color: #007d4c;
+  color: white;
+}
+
+#confirm-cancel-btn:hover {
+  background-color: #016940;
+}
+
+.pagination {
+  margin-top: 20px;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 10px;
+  margin-right: 5px;
+  background-color: #007d4c;
+  color: white;
+  text-decoration: none;
+}
+
+.pagination a:hover {
+  background-color: #016940;
+}
+
+.pagination .active {
+  background-color: #409673; /* Set the color for the active page */
+}
+
+.search-form {
+  margin-bottom: 20px;
+}
+
+.search-form input[type="text"] {
+  width: 250px;
+  padding: 8px;
+  border: 1px solid #555;
+  box-sizing: border-box;
+  background-color: #666;
+  color: #ddd;
+}
+
+.search-form input[type="text"]::placeholder {
+  color: lightgray;
+  opacity: 1; /* Firefox */
+}
+
+.search-form input[type="text"]::-ms-input-placeholder { /* Edge 12 -18 */
+  color: lightgray;
+}
+
+.search-form input[type="text"]:focus {
+  outline: none; /* Remove the default focus outline */
+  border-bottom: 1px solid #ffffff;
+  transition: 0.2s;
+}
+
+.search-form button {
+  margin-right: 10px;
+  padding: 9px;
+  border: none;
+  cursor: pointer;
+  background-color: #007d4c;
+}
+
+.search-form button:hover {
+  background-color: #016940;
+}
+
+.add-user-form {
+  margin-top: 20px;
+}
+
+.add-user-form h2 {
+  margin-bottom: 15px;
+  color: #ddd;
+}
+
+.add-user-form label {
+  display: block;
+  margin-bottom: 5px;
+  color: #ccc;
+}
+
+.add-student-header {
+  cursor: pointer;
+}
+
+.add-student-header:hover {
+  color: #ffffff; /* Changing text color when hovered */
+}
+
+
+.add-student-form {
+  display: none;
+}
+
+.add-user-form input[type="text"],
+.add-user-form input[type="password"],
+.add-user-form input[type="email"],
+.add-user-form input[type="file"] {
+  background-color: #666;
+  color: #ddd;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #555;
+  box-sizing: border-box;
+}
+
+.add-user-form input:focus {
+  outline: none; /* Remove the default focus outline */
+  border-bottom: 1px solid #ffffff;
+  transition: 0.2s;
+}
+
+.add-user-form button {
+  padding: 10px;
+  background-color: #007d4c;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.add-user-form button:hover {
+  background-color: #016940;
+}
+
+.add-user-form input[type="file"] {
+  width: 200px;
+  display: inline-block;
+  padding: 9px;
+  background-color: #666;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.add-user-form input[type="file"]:hover {
+  background-color: #777;
+}
+
+/* Add loader styles */
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Styles for the floating div */
+.attendance-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #444;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  max-height: 80%;
+  width: 800px; /* Adjust the max-width to your desired size */
+  overflow-y: auto;
+}
+
+.close-btn {
+  position: absolute;
+    top: 10px;
+    right: 10px;
+
+    padding: 5px;
+  background-color: #E74C3C;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: #C0392B;
+}
+
+/* Styles for dimming the background */
+.overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  z-index: 999; /* Ensure the overlay appears above other elements */
+}
+
+/* Styles for the attendance table */
+.attendance-table-container {
+  margin-top: 20px; /* Add space between close button and table */
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  color: #ddd;
+  z-index: 1000; /* Ensure the table appears above the overlay */
+  margin-bottom: 20px;
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #555;
+}
+
+.attendance-table th {
+  background-color: #007d4c;
+  color: white;
+}
+
+.attendance-table tbody tr:nth-child(even) {
+  background-color: #555;
+}
+
+.attendance-table tbody tr:hover {
+  background-color: #666;
+}
+
+.present {
+  background-color: #016940;
+}
+
+.absent {
+  background-color: #C0392B;
+}
