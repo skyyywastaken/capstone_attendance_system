@@ -185,7 +185,7 @@ exit(); // Ensure script stops executing after redirection
             $insert_stmt->close();
         } else {
             // Redirect back to attendance_system.php with error message
-            header("Location: attendance_system.php?error=Error:%20Schedule%20not%20found%20for%20today." . $current_day_of_week);
+            header("Location: attendance_system.php?error=Error:%20(". $current_day_of_week . ")%20Schedule%20not%20found%20for%20today.");
             exit();
         }
 
