@@ -485,7 +485,7 @@ $totalParentPages = ceil($totalParents / $parents_per_page);
                 exportBtn.textContent = 'Export as Excel';
                 exportBtn.classList.add('export-btn');
                 exportBtn.addEventListener('click', function() {
-                    exportAttendanceToExcel(attendanceByMonth);
+                    exportAttendanceToExcel(attendanceByMonth, studentId);
                 });
                 attendanceContainer.appendChild(exportBtn);
 
@@ -500,7 +500,7 @@ $totalParentPages = ceil($totalParents / $parents_per_page);
                     monthHeader.textContent = getMonthName(monthKey);
                     tableContainer.appendChild(monthHeader);
 
-                    const monthAttendanceTable = createAttendanceTable(monthData);
+                    const monthAttendanceTable = createAttendanceTable(monthData, studentId, monthKey);
                     tableContainer.appendChild(monthAttendanceTable);
 
                     // Add margin-bottom to create space between tables
@@ -519,9 +519,12 @@ $totalParentPages = ceil($totalParents / $parents_per_page);
 });
 
 // Function to create an attendance table for a specific month
-function createAttendanceTable(data) {
+function createAttendanceTable(data, studentId, monthKey) {
     const attendanceTable = document.createElement('table');
     attendanceTable.classList.add('attendance-calendar');
+
+    // Parse the year and month from the month key
+    const [year, month] = monthKey.split('-');
 
     // Create thead element for table header
     const tableHeader = document.createElement('thead');
@@ -546,14 +549,11 @@ function createAttendanceTable(data) {
     // Create tbody element for table body
     const tableBody = document.createElement('tbody');
 
-    // Get the current date
-    const currentDate = new Date();
+    // Get the first day of the specified month
+    const firstDayOfMonth = new Date(year, month - 1, 1);
 
-    // Get the first day of the current month
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-
-    // Get the last day of the current month
-    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    // Get the last day of the specified month
+    const lastDayOfMonth = new Date(year, month, 0);
 
     let currentRow;
     let currentDayOfWeek = firstDayOfMonth.getDay();
@@ -586,11 +586,28 @@ function createAttendanceTable(data) {
             return recordDate.getDate() === dayOfMonth;
         });
 
-        if (record) {
-            cell.classList.add('present');
-        } else {
-            cell.classList.add('absent');
-        }
+        // Fetch section schedules for the current student
+        fetch('fetch_section_schedules.php?student_id=' + studentId)
+            .then(response => response.json())
+            .then(scheduleData => {
+                // Get the day of the week for the current date
+                const daysOfWeekFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const currentDayName = daysOfWeekFull[dayOfWeek];
+
+                // Check if the current day exists in the fetched section schedules
+                const matchingSchedule = scheduleData.find(schedule => schedule.day_of_week === currentDayName);
+
+                // If the current day exists in the schedule data, check attendance and add classes
+                if (matchingSchedule) {
+                    // If attendance record exists for the current day, add 'present' class
+                    if (record) {
+                        cell.classList.add('present');
+                    } else {
+                        cell.classList.add('absent');
+                    }
+                }
+              
+            });
 
         currentRow.appendChild(cell);
 
@@ -608,6 +625,11 @@ function createAttendanceTable(data) {
     return attendanceTable;
 }
 
+// Function to get the numerical representation of the day of the week
+function getDayOfWeekNumber(dayOfWeekString) {
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return daysOfWeek.indexOf(dayOfWeekString);
+}
 
 
 
@@ -631,25 +653,11 @@ function getMonthName(monthKey) {
 }
 
 // Function to export attendance data to Excel
-function exportAttendanceToExcel(attendanceData) {
-    // Check if attendanceData is an object
-    if (typeof attendanceData !== 'object') {
-        console.error('Attendance data is not an object');
-        return;
-    }
-
-    // Check if attendanceData is empty
-    if (Object.keys(attendanceData).length === 0) {
-        console.error('Attendance data is empty');
-        return;
-    }
-
-    // Create a new workbook
+async function exportAttendanceToExcel(data, studentId) {
     const workbook = XLSX.utils.book_new();
 
     // Iterate over each month's attendance data
-    Object.entries(attendanceData).forEach(([monthKey, monthData]) => {
-        // Create a worksheet for the month
+    for (const [monthKey, monthData] of Object.entries(data)) {
         const worksheetData = [];
 
         // Add headers
@@ -669,16 +677,24 @@ function exportAttendanceToExcel(attendanceData) {
 
         let currentRow = [];
         let currentDayOfWeek = firstDayOfMonth.getDay();
-        let presentCount = 0;
+        let totalPresent = 0; // Variable to store total present days
+        let totalAbsent = 0; // Variable to store total present days
+        
+
+        // Fill in placeholders for days before the first day of the month
+        currentRow.push(''); // Add one blank cell in column A
+        for (let i = 0; i < currentDayOfWeek; i++) {
+            currentRow.push('');
+        }
 
         // Loop through each date in the month
         for (let date = firstDayOfMonth; date <= lastDayOfMonth; date.setDate(date.getDate() + 1)) {
             const dayOfMonth = date.getDate();
             const dayOfWeek = date.getDay(); // Sunday is 0, Monday is 1, etc.
 
-            // Fill in placeholders for days before the first day of the month
-            for (let i = currentRow.length; i < currentDayOfWeek; i++) {
-                currentRow.push('-');
+            // If it's the first day of the week or the first iteration, insert a blank cell
+            if (dayOfWeek === 0 || currentRow.length === 0) {
+                currentRow.push(''); // Insert blank cell in column A
             }
 
             // Find the corresponding attendance record for this date
@@ -687,26 +703,35 @@ function exportAttendanceToExcel(attendanceData) {
                 return recordDate.getDate() === dayOfMonth;
             });
 
-            if (record) {
-                // Mark as present and count days present
-                currentRow.push(`P - ${dayOfMonth}`);
-                presentCount++;
+            // Fetch section schedules for the current student
+            const response = await fetch('fetch_section_schedules.php?student_id=' + studentId);
+            const scheduleData = await response.json();
+
+            // Get the day of the week for the current date
+            const daysOfWeekFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const currentDayName = daysOfWeekFull[dayOfWeek];
+
+            // Check if the current day exists in the fetched section schedules
+            const matchingSchedule = scheduleData.find(schedule => schedule.day_of_week === currentDayName);
+
+            // If the current day exists in the schedule data, check attendance and add classes
+            if (matchingSchedule) {
+                // Check if attendance record exists for the current day and add 'present' or 'absent' class
+                if (record) {
+                    currentRow.push(`${dayOfMonth} - Present`);
+                    totalPresent++; // Increment total present days
+                } else {
+                    currentRow.push(`${dayOfMonth} - Absent`);
+                    totalAbsent++;
+                }
             } else {
-                // Mark as absent
-                currentRow.push(`A - ${dayOfMonth}`);
+              currentRow.push(`${dayOfMonth}`);
             }
 
             // Move to the next row if it's the last day of the week
             if (dayOfWeek === 6) {
                 worksheetData.push(currentRow);
-                currentRow = [];
-            }
-
-            // Reset the day of the week counter if it's the last day of the week
-            if (dayOfWeek === 6) {
-                currentDayOfWeek = 0;
-            } else {
-                currentDayOfWeek++;
+                currentRow = [];                
             }
         }
 
@@ -716,23 +741,31 @@ function exportAttendanceToExcel(attendanceData) {
         }
 
         // Add present count row
-        worksheetData.push(['', '', '', '', '', '', '', `Total Present: ${presentCount}`]);
+        worksheetData.push(['', '', '', '', '', '', '', `Total Present: ${totalPresent}`]);
+        worksheetData.push(['', '', '', '', '', '', '', `Total Absent: ${totalAbsent}`]);
 
         // Create a worksheet
         const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
-        // Set column widths (optional)
-        const wscols = Array.from({ length: daysOfWeek.length + 1 }, () => ({ wch: 10 })); // Adjust column width as needed
-        worksheet['!cols'] = wscols;
-
         // Add the worksheet to the workbook
         workbook.SheetNames.push(getMonthName(monthKey));
         workbook.Sheets[getMonthName(monthKey)] = worksheet;
-    });
+
+        // Set column widths (optional)
+        const wscols = [{ wpx: 100 }]; // Adjust column width as needed
+        for (let i = 0; i < daysOfWeek.length; i++) {
+            wscols.push({ wpx: 100 }); // Adjust column width as needed
+        }
+        worksheet['!cols'] = wscols;
+
+    }
 
     // Generate Excel file and trigger download
     XLSX.writeFile(workbook, 'attendance.xlsx');
 }
+
+
+
 
 
 

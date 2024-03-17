@@ -1,13 +1,14 @@
 button {
+  margin-top: 5px;
   padding: 5px;
-  background-color: #E74C3C;
+  background-color: #007d4c;
   color: white;
   border: none;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #C0392B;
+  background-color: #016940;
 }
 
 .overlay {
