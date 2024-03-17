@@ -64,6 +64,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $insert_stmt = $db_conn->prepare("INSERT INTO attendance (student_id, date_time, status) VALUES (?, NOW(), ?)");
                 $insert_stmt->bind_param("ss", $student_id, $attendance_status);
 
+                // Update students table to set in_school to 1
+$update_stmt = $db_conn->prepare("UPDATE students SET in_school = 1 WHERE student_id = ?");
+$update_stmt->bind_param("s", $student_id);
+$update_stmt->execute();
+
 
                 if ($insert_stmt->execute()) {
                     
