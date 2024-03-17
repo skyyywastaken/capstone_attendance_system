@@ -55,8 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $attendance_status = 'On Time';
                 }
 
-
-                // Check if the QR code is expired
+            // Check if the QR code is expired
             $now = time();
 
             if ($now <= $expiration_time) {
@@ -65,15 +64,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $insert_stmt->bind_param("ss", $student_id, $attendance_status);
 
                 // Update students table to set in_school to 1
-$update_stmt = $db_conn->prepare("UPDATE students SET in_school = 1 WHERE student_id = ?");
-$update_stmt->bind_param("s", $student_id);
-$update_stmt->execute();
-
+                $update_stmt = $db_conn->prepare("UPDATE students SET in_school = 1 WHERE student_id = ?");
+                $update_stmt->bind_param("s", $student_id);
+                $update_stmt->execute();
 
                 if ($insert_stmt->execute()) {
-                    
-
-                    
                     $student_name = $student_info['name'];
                     $student_image = $student_info['image']; // Assuming 'image' is the column name for the image URL
 
