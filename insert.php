@@ -305,13 +305,14 @@ exit(); // Ensure script stops executing after redirection
                     header("Location: attendance_system.php?error=Error%20recording%20attendance:%20" . $insert_stmt->error);
                     exit(); // Ensure script stops executing after redirection
                 }
+                $insert_stmt->close();
             } else {
                 // Redirect back to attendance_system.php with error message
                 header("Location: attendance_system.php?error=Error:%20QR%20code%20has%20expired.");
                 exit(); // Ensure script stops executing after redirection
             }
 
-            $insert_stmt->close();
+            
         } else {
             // Redirect back to attendance_system.php with error message
             header("Location: attendance_system.php?error=Error:%20(". $current_day_of_week . ")%20Schedule%20not%20found%20for%20today.");
