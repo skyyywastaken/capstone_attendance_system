@@ -192,6 +192,10 @@ exit(); // Ensure script stops executing after redirection
 
                             // Redirect or perform any other action after recording leaving time
                         }
+                    } else {
+                        // Redirect back to attendance_system.php with error message
+                        header("Location: attendance_system.php?error=You%20are%20expected%20to%20remain%20on%20the%20school%20premises%20until%20the%20designated%20dismissal%20time.");
+                        exit(); // Ensure script stops executing after redirection
                     }
                 } elseif ($student_info['in_school'] !== 1) {
                     // Student ID is registered, insert the attendance record into the database
