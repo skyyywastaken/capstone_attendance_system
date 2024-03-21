@@ -12,6 +12,7 @@
     if ($_COOKIE['role'] == 'admin') {
       echo '<a href="students.php" class="' . ($active_page === 'students' ? 'active' : '') . '">Students</a>';
       echo '<a href="attendance_system.php" target="_blank" class="' . ($active_page === 'attendance_system' ? 'active' : '') . '">Attendance System</a>';
+      echo '<a href="schedule.php" class="' . ($active_page === 'schedule' ? 'active' : '') . '">Scheduling</a>';
     }
   ?>
 

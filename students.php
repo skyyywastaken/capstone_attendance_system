@@ -605,6 +605,10 @@ function createAttendanceTable(data, studentId, monthKey) {
                     } else {
                         cell.classList.add('absent');
                     }
+                } else {
+                  if (record) {
+                        cell.classList.add('present');
+                    }
                 }
               
             });
@@ -725,7 +729,13 @@ async function exportAttendanceToExcel(data, studentId) {
                     totalAbsent++;
                 }
             } else {
-              currentRow.push(`${dayOfMonth}`);
+                // Check if attendance record exists for the current day and add 'present' or 'absent' class
+                if (record) {
+                    currentRow.push(`${dayOfMonth} - Present`);
+                    totalPresent++; // Increment total present days
+                } else {
+                  currentRow.push(`${dayOfMonth}`);
+                }
             }
 
             // Move to the next row if it's the last day of the week
