@@ -44,11 +44,7 @@ if ($role === 'parent' || $role === 'guardian') {
     $result = $stmt->get_result();
     $attendance_status = $result->fetch_assoc()['in_school'] ? 'In School' : 'Not In School';
     $stmt->close();
-} elseif ($role === 'admin') {
-    // If user is a admin, get their attendance status
-    $attendance_status = "Hi Bitch!";
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +86,7 @@ if ($role === 'parent' || $role === 'guardian') {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            <?php elseif ($role === 'student' || 'admin') : ?>
+            <?php elseif ($role === 'student') : ?>
                 <p>Attendance Status: <?php echo $attendance_status; ?></p>
             <?php endif; ?>
         </div>
