@@ -36,7 +36,7 @@ if ($role === 'parent' || $role === 'guardian') {
         $children_data[] = $row;
     }
     $stmt->close();
-} elseif ($role === 'student' || 'admin') {
+} elseif ($role === 'student') {
     // If user is a student, get their attendance status
     $stmt = $db_conn->prepare("SELECT in_school FROM students WHERE username=?");
     $stmt->bind_param("s", $username);
@@ -44,6 +44,9 @@ if ($role === 'parent' || $role === 'guardian') {
     $result = $stmt->get_result();
     $attendance_status = $result->fetch_assoc()['in_school'] ? 'In School' : 'Not In School';
     $stmt->close();
+} elseif ($role === 'admin') {
+    // If user is a admin, get their attendance status
+    $attendance_status = "Hi Bitch!";
 }
 
 ?>
