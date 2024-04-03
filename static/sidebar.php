@@ -5,7 +5,7 @@
   <a href="dashboard.php" class="<?php echo ($active_page === 'dashboard') ? 'active' : ''; ?>">Dashboard</a>
 
   <?php
-    if ($_COOKIE['role'] == 'student' || $_COOKIE['role'] == 'admin') {
+    if ($_COOKIE['role'] == 'student') {
       echo '<a href="student_qr.php" class="' . ($active_page === 'student_qr' ? 'active' : '') . '">QR Code</a>';
     }
 
