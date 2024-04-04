@@ -202,6 +202,8 @@ function sendEmail($recipient_email, $username, $password, $name, $recipient_typ
         $mail_body .= '<p><strong>General Instructions:</strong></p>
                        <p>Please use a web browser (e.g., Safari, Google Chrome) for the initial login as it is a one-time process.</p>
                        <p>If you need to change your device, please seek assistance from the administrator.</p>
+                       <br>
+                       <p>&copy; 2024 Josef Lopez. SJA.</p>
                     </div>
                 </body>
             </html>
