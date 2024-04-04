@@ -109,10 +109,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       // After adding the users to the database, send emails to the student and parent
     // Send email to student
-    sendEmail($student_email, $student_username, $student_password, $student_name);
+    sendEmail($student_email, $student_username, $student_password, $student_name, 'student');
 
     // Send email to parent
-    sendEmail($parent_email, $parent_username, $parent_password, $parent_name);
+    sendEmail($parent_email, $parent_username, $parent_password, $parent_name, 'parent');
       
       // Redirect back to the same page to display the loading overlay
     header("Location: students.php?page=$current_page");
@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Function to send email
-function sendEmail($recipient_email, $username, $password, $name) {
+function sendEmail($recipient_email, $username, $password, $name, $recipient_type) {
   require 'vendor/autoload.php'; // Include the PHPMailer autoloader
 
   // Instantiate PHPMailer
@@ -133,8 +133,8 @@ function sendEmail($recipient_email, $username, $password, $name) {
       $mail->isSMTP();                                        // Send using SMTP
       $mail->Host       = 'smtp.gmail.com';                   // Set the SMTP server to send through
       $mail->SMTPAuth   = true;                               // Enable SMTP authentication
-      $mail->Username   = 'sjaattendancesystem@gmail.com';             // SMTP username
-      $mail->Password   = 'cmxkvzmswwmcgioq';                    // SMTP password
+      $mail->Username   = 'sjaattendancesystem@gmail.com';     // SMTP username
+      $mail->Password   = 'cmxkvzmswwmcgioq';                 // SMTP password
       $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;     // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
       $mail->Port       = 587;                                // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
 
@@ -145,7 +145,7 @@ function sendEmail($recipient_email, $username, $password, $name) {
       // Content
       $mail->isHTML(true);                                    // Set email format to HTML
       $mail->Subject = 'Account Creation';
-      $mail->Body = '
+      $mail_body = '
             <html>
                 <head>
                     <style>
@@ -184,20 +184,40 @@ function sendEmail($recipient_email, $username, $password, $name) {
                             <p><strong>Username:</strong> ' . $username . '</p>
                             <p><strong>Password:</strong> ' . $password . '</p>
                         </div>
-                        <p>You can now log in to access your account @ <a href="https://sjaattendancesystem.com/">SJA Attendance System</a>.</p>
+                        <p>You can now log in to access your account @ <a href="http://www.sjaattendancesystem.xyz/">SJA Attendance System</a>.</p>
+        ';
+
+        // Add instructions based on recipient type
+        if ($recipient_type === 'student') {
+            $mail_body .= '<p><strong>Instructions for Students:</strong></p>
+                           <p>When scanning the QR code, ensure your phone brightness is set to maximum.</p>
+                           <p>QR Codes are valid for only 5 seconds. If necessary, regenerate the code.</p>';
+        } elseif ($recipient_type === 'parent') {
+            $mail_body .= '<p><strong>Instructions for Parents:</strong></p>
+                           <p>You can check whether your child is currently in school or not using the system.</p>
+                           <p>You will receive notifications regarding your child\'s presence in or departure from school along with timestamps.</p>';
+        }
+
+        // Common instructions for all recipients
+        $mail_body .= '<p><strong>General Instructions:</strong></p>
+                       <p>Please use a web browser (e.g., Safari, Google Chrome) for the initial login as it is a one-time process.</p>
+                       <p>If you need to change your device, please seek assistance from the administrator.</p>
                     </div>
                 </body>
             </html>
         ';
 
+        $mail->Body = $mail_body;
+
         $mail->AltBody = "Hello $name,\n\nYour account has been successfully created with the following credentials:\n\nUsername: $username\nPassword: $password\n\nYou can now log in to access your account.";
-      
-      $mail->send();
-      echo 'Email sent successfully';
-  } catch (Exception $e) {
-      echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-  }
+
+        $mail->send();
+        echo 'Email sent successfully';
+    } catch (Exception $e) {
+        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+    }
 }
+
 
 // Fetch total number of students with search filter
 $stmt_total = $db_conn->prepare("SELECT COUNT(*) AS total FROM students WHERE name LIKE CONCAT('%', ?, '%')");
