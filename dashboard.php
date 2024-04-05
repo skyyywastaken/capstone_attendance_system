@@ -89,6 +89,9 @@ if ($role === 'parent' || $role === 'guardian') {
             <?php elseif ($role === 'student') : ?>
                 <p>Attendance Status: <?php echo $attendance_status; ?></p>
             <?php endif; ?>
+            <p>
+            The Capstone Research Project System, created by Josef Lopez, is solely for use by St. Joseph's Academy of Las Pinas. It helps manage the project, ensuring confidentiality of all information. For assistance, contact Josef Lopez. The system will be taken down after testing.
+            </p>
         </div>
     </div>
 
