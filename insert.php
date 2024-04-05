@@ -157,6 +157,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             </div>
     
                                             <p>Thank you for using our attendance system.</p>
+                                            <br>
+                                            <p>&copy; 2024 Josef Lopez. SJA.</p>
                                         </div>
                                     </body>
                                     </html>
@@ -348,6 +350,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         '</p>
                     </div>
                     <p>Thank you for using our attendance system.</p>
+                    <br>
+                    <p>&copy; 2024 Josef Lopez. SJA.</p>
                 </div>
             </body>
             </html>
