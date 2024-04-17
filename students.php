@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $student_new_image_name = $student_username . '.' . $student_file_extension;
       
       // Define the URL for the image
-      $student_url_link = 'http://localhost/capstone_research_project_v69/student_images/' . $student_new_image_name;
+      $student_url_link = 'http://www.sjaattendancesystem.xyz/student_images/' . $student_new_image_name;
       
       // Move uploaded file to /student_images folder with the new name
       $student_image_path = 'student_images/' . $student_new_image_name;
@@ -321,9 +321,9 @@ $totalParentPages = ceil($totalParents / $parents_per_page);
               </form>
 
               <form method="post">
-        <input type="hidden" name="student_id" value="<?php echo $student['student_id']; ?>">
-        <button type="submit" name="view_attendance">View Attendance</button>
-    </form>
+                <input type="hidden" name="student_id" value="<?php echo $student['student_id']; ?>">
+                <button type="submit" name="view_attendance">View Attendance</button>
+              </form>
             </td>
           </tr>
           <?php endforeach; ?>
@@ -464,84 +464,84 @@ $totalParentPages = ceil($totalParents / $parents_per_page);
 
   document.querySelectorAll('[name="view_attendance"]').forEach(button => {
     button.addEventListener('click', function(event) {
-        event.preventDefault();
-        const studentId = this.parentElement.querySelector('[name="student_id"]').value;
+      event.preventDefault();
+      const studentId = this.parentElement.querySelector('[name="student_id"]').value;
 
-        // Create overlay
-        const overlay = document.createElement('div');
-        overlay.classList.add('overlay');
-        document.body.appendChild(overlay);
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.classList.add('overlay');
+      document.body.appendChild(overlay);
 
-        // Send AJAX request to fetch attendance data
-        fetch('fetch_attendance.php?student_id=' + studentId)
-    .then(response => response.json())
-    .then(data => {
-        // Group attendance data by month
-        const attendanceByMonth = {};
-        data.forEach(record => {
+      // Send AJAX request to fetch attendance data
+      fetch('fetch_attendance.php?student_id=' + studentId)
+        .then(response => response.json())
+        .then(data => {
+          // Group attendance data by month
+          const attendanceByMonth = {};
+          data.forEach(record => {
             const date = new Date(record.date_time);
             const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
             if (!attendanceByMonth[monthKey]) {
-                attendanceByMonth[monthKey] = [];
+              attendanceByMonth[monthKey] = [];
             }
             // Include student ID in the attendance record
             record.student_id = studentId;
             attendanceByMonth[monthKey].push(record);
+          });
+
+          // Display attendance data in a floating div
+          const attendanceContainer = document.createElement('div');
+          attendanceContainer.classList.add('attendance-container');
+
+          const closeBtn = document.createElement('button');
+          closeBtn.textContent = 'Close';
+          closeBtn.classList.add('close-btn');
+          closeBtn.addEventListener('click', function() {
+            attendanceContainer.remove();
+            overlay.remove(); // Remove the overlay when closing the table
+          });
+          attendanceContainer.appendChild(closeBtn);
+
+          // Create a button to export data as Excel
+          const exportBtn = document.createElement('button');
+          exportBtn.textContent = 'Export as Excel';
+          exportBtn.classList.add('export-btn');
+          exportBtn.addEventListener('click', function() {
+            exportAttendanceToExcel(attendanceByMonth, studentId);
+          });
+          attendanceContainer.appendChild(exportBtn);
+
+          // Create a container div for the attendance tables and pagination
+          const tableContainer = document.createElement('div');
+          tableContainer.classList.add('attendance-table-container');
+
+          // Loop through each month's attendance data
+          Object.entries(attendanceByMonth).forEach(([monthKey, monthData]) => {
+            const monthHeader = document.createElement('div');
+            monthHeader.classList.add('month-header');
+            monthHeader.textContent = getMonthName(monthKey);
+            tableContainer.appendChild(monthHeader);
+
+            const monthAttendanceTable = createAttendanceTable(monthData, studentId, monthKey);
+            tableContainer.appendChild(monthAttendanceTable);
+
+            // Add margin-bottom to create space between tables
+            monthHeader.style.marginBottom = '10px';
+            monthAttendanceTable.style.marginBottom = '20px';
+          });
+
+          attendanceContainer.appendChild(tableContainer);
+          document.body.appendChild(attendanceContainer);
+        })
+        .catch(error => {
+          console.error('Error fetching attendance:', error);
+          overlay.remove(); // Remove the overlay if an error occurs
         });
-
-                // Display attendance data in a floating div
-                const attendanceContainer = document.createElement('div');
-                attendanceContainer.classList.add('attendance-container');
-
-                const closeBtn = document.createElement('button');
-                closeBtn.textContent = 'Close';
-                closeBtn.classList.add('close-btn');
-                closeBtn.addEventListener('click', function() {
-                    attendanceContainer.remove();
-                    overlay.remove(); // Remove the overlay when closing the table
-                });
-                attendanceContainer.appendChild(closeBtn);
-
-                // Create a button to export data as Excel
-                const exportBtn = document.createElement('button');
-                exportBtn.textContent = 'Export as Excel';
-                exportBtn.classList.add('export-btn');
-                exportBtn.addEventListener('click', function() {
-                    exportAttendanceToExcel(attendanceByMonth, studentId);
-                });
-                attendanceContainer.appendChild(exportBtn);
-
-                // Create a container div for the attendance tables and pagination
-                const tableContainer = document.createElement('div');
-                tableContainer.classList.add('attendance-table-container');
-
-                // Loop through each month's attendance data
-                Object.entries(attendanceByMonth).forEach(([monthKey, monthData]) => {
-                    const monthHeader = document.createElement('div');
-                    monthHeader.classList.add('month-header');
-                    monthHeader.textContent = getMonthName(monthKey);
-                    tableContainer.appendChild(monthHeader);
-
-                    const monthAttendanceTable = createAttendanceTable(monthData, studentId, monthKey);
-                    tableContainer.appendChild(monthAttendanceTable);
-
-                    // Add margin-bottom to create space between tables
-                    monthHeader.style.marginBottom = '10px';
-                    monthAttendanceTable.style.marginBottom = '20px';
-                });
-
-                attendanceContainer.appendChild(tableContainer);
-                document.body.appendChild(attendanceContainer);
-            })
-            .catch(error => {
-                console.error('Error fetching attendance:', error);
-                overlay.remove(); // Remove the overlay if an error occurs
-            });
     });
-});
+  });
 
-// Function to create an attendance table for a specific month
-function createAttendanceTable(data, studentId, monthKey) {
+  // Function to create an attendance table for a specific month
+  function createAttendanceTable(data, studentId, monthKey) {
     const attendanceTable = document.createElement('table');
     attendanceTable.classList.add('attendance-calendar');
 
@@ -557,9 +557,9 @@ function createAttendanceTable(data, studentId, monthKey) {
 
     // Create th elements for days of the week
     daysOfWeek.forEach(day => {
-        const dayHeader = document.createElement('th');
-        dayHeader.textContent = day;
-        headerRow.appendChild(dayHeader);
+      const dayHeader = document.createElement('th');
+      dayHeader.textContent = day;
+      headerRow.appendChild(dayHeader);
     });
 
     // Append the header row to the table header
@@ -582,80 +582,80 @@ function createAttendanceTable(data, studentId, monthKey) {
 
     // Loop through each date in the month
     for (let date = firstDayOfMonth; date <= lastDayOfMonth; date.setDate(date.getDate() + 1)) {
-        const dayOfMonth = date.getDate();
-        const dayOfWeek = date.getDay(); // Sunday is 0, Monday is 1, etc.
+      const dayOfMonth = date.getDate();
+      const dayOfWeek = date.getDay(); // Sunday is 0, Monday is 1, etc.
 
-        // Start a new row for each week
-        if (dayOfWeek === 0 || !currentRow) {
-            currentRow = document.createElement('tr');
-            tableBody.appendChild(currentRow);
+      // Start a new row for each week
+      if (dayOfWeek === 0 || !currentRow) {
+        currentRow = document.createElement('tr');
+        tableBody.appendChild(currentRow);
 
-            // Fill in placeholders for days before the first day of the month
-            for (let i = 0; i < currentDayOfWeek; i++) {
-                const cell = document.createElement('td');
-                cell.textContent = '-';
-                currentRow.appendChild(cell);
-            }
+        // Fill in placeholders for days before the first day of the month
+        for (let i = 0; i < currentDayOfWeek; i++) {
+          const cell = document.createElement('td');
+          cell.textContent = '-';
+          currentRow.appendChild(cell);
         }
+      }
 
-        // Fill in the cell with the day of the month
-        const cell = document.createElement('td');
-        cell.textContent = dayOfMonth;
+      // Fill in the cell with the day of the month
+      const cell = document.createElement('td');
+      cell.textContent = dayOfMonth;
 
-        // Find the corresponding attendance record for this date
-        const record = data.find(record => {
-            const recordDate = new Date(record.date_time);
-            return recordDate.getDate() === dayOfMonth;
+      // Find the corresponding attendance record for this date
+      const record = data.find(record => {
+        const recordDate = new Date(record.date_time);
+        return recordDate.getDate() === dayOfMonth;
+      });
+
+      // Fetch section schedules for the current student
+      fetch('fetch_section_schedules.php?student_id=' + studentId)
+        .then(response => response.json())
+        .then(scheduleData => {
+          // Get the day of the week for the current date
+          const daysOfWeekFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const currentDayName = daysOfWeekFull[dayOfWeek];
+
+          // Check if the current day exists in the fetched section schedules
+          const matchingSchedule = scheduleData.find(schedule => schedule.day_of_week === currentDayName);
+
+          // If the current day exists in the schedule data, check attendance and add classes
+          if (matchingSchedule) {
+            // If attendance record exists for the current day, add 'present' class
+            if (record) {
+              cell.classList.add('present');
+            } else {
+              // cell.classList.add('absent');
+            }
+          } else {
+            if (record) {
+              cell.classList.add('present');
+            }
+          }
+
         });
 
-        // Fetch section schedules for the current student
-        fetch('fetch_section_schedules.php?student_id=' + studentId)
-            .then(response => response.json())
-            .then(scheduleData => {
-                // Get the day of the week for the current date
-                const daysOfWeekFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                const currentDayName = daysOfWeekFull[dayOfWeek];
+      currentRow.appendChild(cell);
 
-                // Check if the current day exists in the fetched section schedules
-                const matchingSchedule = scheduleData.find(schedule => schedule.day_of_week === currentDayName);
-
-                // If the current day exists in the schedule data, check attendance and add classes
-                if (matchingSchedule) {
-                    // If attendance record exists for the current day, add 'present' class
-                    if (record) {
-                        cell.classList.add('present');
-                    } else {
-                        cell.classList.add('absent');
-                    }
-                } else {
-                  if (record) {
-                        cell.classList.add('present');
-                    }
-                }
-              
-            });
-
-        currentRow.appendChild(cell);
-
-        // Reset the day of the week counter if it's the last day of the week
-        if (dayOfWeek === 6) {
-            currentDayOfWeek = 0;
-        } else {
-            currentDayOfWeek++;
-        }
+      // Reset the day of the week counter if it's the last day of the week
+      if (dayOfWeek === 6) {
+        currentDayOfWeek = 0;
+      } else {
+        currentDayOfWeek++;
+      }
     }
 
     // Append the table body to the attendance table
     attendanceTable.appendChild(tableBody);
 
     return attendanceTable;
-}
+  }
 
-// Function to get the numerical representation of the day of the week
-function getDayOfWeekNumber(dayOfWeekString) {
+  // Function to get the numerical representation of the day of the week
+  function getDayOfWeekNumber(dayOfWeekString) {
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return daysOfWeek.indexOf(dayOfWeekString);
-}
+  }
 
 
 
@@ -668,146 +668,136 @@ function getDayOfWeekNumber(dayOfWeekString) {
 
 
 
-// Function to get the name of the month from a month key
-function getMonthName(monthKey) {
+  // Function to get the name of the month from a month key
+  function getMonthName(monthKey) {
     const [year, month] = monthKey.split('-');
     const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
-}
+  }
 
-// Function to export attendance data to Excel
-async function exportAttendanceToExcel(data, studentId) {
+  // Function to export attendance data to Excel
+  async function exportAttendanceToExcel(data, studentId) {
     const workbook = XLSX.utils.book_new();
 
     // Iterate over each month's attendance data
     for (const [monthKey, monthData] of Object.entries(data)) {
-        const worksheetData = [];
+      const worksheetData = [];
 
-        // Add headers
-        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const headerRow = [''];
-        daysOfWeek.forEach(day => headerRow.push(day));
-        worksheetData.push(headerRow);
+      // Add headers
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const headerRow = [''];
+      daysOfWeek.forEach(day => headerRow.push(day));
+      worksheetData.push(headerRow);
 
-        // Get the current date
-        const currentDate = new Date(monthKey);
+      // Get the current date
+      const currentDate = new Date(monthKey);
 
-        // Get the first day of the current month
-        const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      // Get the first day of the current month
+      const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
-        // Get the last day of the current month
-        const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+      // Get the last day of the current month
+      const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
-        let currentRow = [];
-        let currentDayOfWeek = firstDayOfMonth.getDay();
-        let totalPresent = 0; // Variable to store total present days
-        let totalAbsent = 0; // Variable to store total present days
-        
+      let currentRow = [];
+      let currentDayOfWeek = firstDayOfMonth.getDay();
+      let totalPresent = 0; // Variable to store total present days
+      let totalAbsent = 0; // Variable to store total present days
 
-        // Fill in placeholders for days before the first day of the month
-        currentRow.push(''); // Add one blank cell in column A
-        for (let i = 0; i < currentDayOfWeek; i++) {
-            currentRow.push('');
+
+      // Fill in placeholders for days before the first day of the month
+      currentRow.push(''); // Add one blank cell in column A
+      for (let i = 0; i < currentDayOfWeek; i++) {
+        currentRow.push('');
+      }
+
+      // Loop through each date in the month
+      for (let date = firstDayOfMonth; date <= lastDayOfMonth; date.setDate(date.getDate() + 1)) {
+        const dayOfMonth = date.getDate();
+        const dayOfWeek = date.getDay(); // Sunday is 0, Monday is 1, etc.
+
+        // If it's the first day of the week or the first iteration, insert a blank cell
+        if (dayOfWeek === 0 || currentRow.length === 0) {
+          currentRow.push(''); // Insert blank cell in column A
         }
 
-        // Loop through each date in the month
-        for (let date = firstDayOfMonth; date <= lastDayOfMonth; date.setDate(date.getDate() + 1)) {
-            const dayOfMonth = date.getDate();
-            const dayOfWeek = date.getDay(); // Sunday is 0, Monday is 1, etc.
+        // Find the corresponding attendance record for this date
+        const record = monthData.find(record => {
+          const recordDate = new Date(record.date_time);
+          return recordDate.getDate() === dayOfMonth;
+        });
 
-            // If it's the first day of the week or the first iteration, insert a blank cell
-            if (dayOfWeek === 0 || currentRow.length === 0) {
-                currentRow.push(''); // Insert blank cell in column A
-            }
+        // Fetch section schedules for the current student
+        const response = await fetch('fetch_section_schedules.php?student_id=' + studentId);
+        const scheduleData = await response.json();
 
-            // Find the corresponding attendance record for this date
-            const record = monthData.find(record => {
-                const recordDate = new Date(record.date_time);
-                return recordDate.getDate() === dayOfMonth;
-            });
+        // Get the day of the week for the current date
+        const daysOfWeekFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const currentDayName = daysOfWeekFull[dayOfWeek];
 
-            // Fetch section schedules for the current student
-            const response = await fetch('fetch_section_schedules.php?student_id=' + studentId);
-            const scheduleData = await response.json();
+        // Check if the current day exists in the fetched section schedules
+        const matchingSchedule = scheduleData.find(schedule => schedule.day_of_week === currentDayName);
 
-            // Get the day of the week for the current date
-            const daysOfWeekFull = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const currentDayName = daysOfWeekFull[dayOfWeek];
-
-            // Check if the current day exists in the fetched section schedules
-            const matchingSchedule = scheduleData.find(schedule => schedule.day_of_week === currentDayName);
-
-            // If the current day exists in the schedule data, check attendance and add classes
-            if (matchingSchedule) {
-                // Check if attendance record exists for the current day and add 'present' or 'absent' class
-                if (record) {
-                    currentRow.push(`${dayOfMonth} - Present`);
-                    totalPresent++; // Increment total present days
-                } else {
-                    currentRow.push(`${dayOfMonth} - Absent`);
-                    totalAbsent++;
-                }
-            } else {
-                // Check if attendance record exists for the current day and add 'present' or 'absent' class
-                if (record) {
-                    currentRow.push(`${dayOfMonth} - Present`);
-                    totalPresent++; // Increment total present days
-                } else {
-                  currentRow.push(`${dayOfMonth}`);
-                }
-            }
-
-            // Move to the next row if it's the last day of the week
-            if (dayOfWeek === 6) {
-                worksheetData.push(currentRow);
-                currentRow = [];                
-            }
+        // If the current day exists in the schedule data, check attendance and add classes
+        if (matchingSchedule) {
+          // Check if attendance record exists for the current day and add 'present' or 'absent' class
+          if (record) {
+            currentRow.push(`${dayOfMonth} - Present`);
+            totalPresent++; // Increment total present days
+          } else {
+            currentRow.push(`${dayOfMonth}`);
+            totalAbsent++;
+          }
+        } else {
+          // Check if attendance record exists for the current day and add 'present' or 'absent' class
+          if (record) {
+            currentRow.push(`${dayOfMonth} - Present`);
+            totalPresent++; // Increment total present days
+          } else {
+            currentRow.push(`${dayOfMonth}`);
+          }
         }
 
-        // Push the last row if it's not complete
-        if (currentRow.length > 0) {
-            worksheetData.push(currentRow);
+        // Move to the next row if it's the last day of the week
+        if (dayOfWeek === 6) {
+          worksheetData.push(currentRow);
+          currentRow = [];
         }
+      }
 
-        // Add present count row
-        worksheetData.push(['', '', '', '', '', '', '', `Total Present: ${totalPresent}`]);
-        worksheetData.push(['', '', '', '', '', '', '', `Total Absent: ${totalAbsent}`]);
+      // Push the last row if it's not complete
+      if (currentRow.length > 0) {
+        worksheetData.push(currentRow);
+      }
 
-        // Create a worksheet
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      // Add present count row
+      worksheetData.push(['', '', '', '', '', '', '', `Total Present: ${totalPresent}`]);
 
-        // Add the worksheet to the workbook
-        workbook.SheetNames.push(getMonthName(monthKey));
-        workbook.Sheets[getMonthName(monthKey)] = worksheet;
+      // Create a worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
-        // Set column widths (optional)
-        const wscols = [{ wpx: 100 }]; // Adjust column width as needed
-        for (let i = 0; i < daysOfWeek.length; i++) {
-            wscols.push({ wpx: 100 }); // Adjust column width as needed
-        }
-        worksheet['!cols'] = wscols;
+      // Add the worksheet to the workbook
+      workbook.SheetNames.push(getMonthName(monthKey));
+      workbook.Sheets[getMonthName(monthKey)] = worksheet;
+
+      // Set column widths (optional)
+      const wscols = [{
+        wpx: 100
+      }]; // Adjust column width as needed
+      for (let i = 0; i < daysOfWeek.length; i++) {
+        wscols.push({
+          wpx: 100
+        }); // Adjust column width as needed
+      }
+      worksheet['!cols'] = wscols;
 
     }
 
     // Generate Excel file and trigger download
     XLSX.writeFile(workbook, 'attendance.xlsx');
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }
   </script>
 </body>
 
